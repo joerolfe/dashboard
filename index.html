@@ -155,7 +155,9 @@
   .tbl tbody tr:last-child td { border-bottom: 0; }
   .tbl td.hl, .tbl th.hl { background: rgba(255,69,58,.14); }
 
-  /* ---------- today ---------- */
+  /* ---------- financial: Money | Content switch on top of each half ---------- */
+
+  /* ---------- daily/weekly ---------- */
   #v-today { grid-template-rows: minmax(0, 1.3fr) minmax(0, 1fr); }
   .ring { position: relative; width: 50px; height: 50px; flex: none; }
   .ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
@@ -205,26 +207,64 @@
   .wtabs { display: flex; gap: 4px; }
   .wtabs button { all: unset; cursor: pointer; padding: 4px 10px; border-radius: 99px; font-size: 12px; font-weight: 600; color: var(--muted); background: rgba(255,255,255,.06); white-space: nowrap; }
   .wtabs button.on { color: #fff; background: color-mix(in srgb, var(--c) 34%, transparent); }
-  .wprog { flex: none; display: flex; align-items: center; gap: 10px; font-size: 12px; font-weight: 600; color: var(--muted); }
-  .wprog .track { flex: 1; height: 6px; border-radius: 99px; background: rgba(255,255,255,.1); overflow: hidden; }
-  .wprog .track i { display: block; height: 100%; width: 0; border-radius: 99px; transition: width .6s cubic-bezier(.22,1,.36,1); }
+  .wsplit { flex: none; display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+  .wsplit button { all: unset; box-sizing: border-box; cursor: pointer; text-align: center; padding: 7px 4px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; color: var(--faint); background: rgba(255,255,255,.05); border: 1px solid transparent; transition: background .2s, border-color .2s; }
+  .wsplit button b { display: block; margin-top: 2px; font-size: 13px; font-weight: 700; color: color-mix(in srgb, var(--c) 70%, #fff); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .wsplit button:hover:not(.rest) { background: rgba(255,255,255,.1); }
+  .wsplit button.on { background: color-mix(in srgb, var(--c) 22%, transparent); }
+  .wsplit button.today { border-color: color-mix(in srgb, var(--c) 80%, transparent); color: #fff; }
+  .wsplit button.rest { cursor: default; }
+  .wsplit button.rest b { color: var(--faint); }
+  .wstats { flex: none; display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  .wstats .mini { padding: 8px 10px; }
+  .wstats b { display: block; font-size: 19px; font-weight: 750; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+  .wstats small { display: block; font-size: 11px; color: var(--faint); margin-top: 1px; }
+  .wstats .track { height: 4px; border-radius: 99px; background: rgba(255,255,255,.1); overflow: hidden; margin-top: 6px; }
+  .wstats .track i { display: block; height: 100%; width: 0; border-radius: 99px; transition: width .6s cubic-bezier(.22,1,.36,1); }
+  .whead, .ex { display: grid; grid-template-columns: 22px minmax(0, 1fr) 100px 100px 64px 120px 50px; align-items: center; gap: 10px; padding: 0 8px; }
+  .whead { flex: none; font-size: 10.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--faint); }
+  .whead span:nth-child(n+3):nth-child(-n+6) { text-align: center; }
+  .ex .kg.nx b { color: var(--green); }
   .wlist { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 1px; }
-  .ex { flex: 1 1 0; min-height: 0; max-height: 52px; display: flex; align-items: center; gap: 11px; padding: 0 8px; border-radius: 11px; cursor: pointer; transition: background .15s; }
+  .ex { flex: 1 1 0; min-height: 0; max-height: 50px; border-radius: 11px; cursor: pointer; transition: background .15s; }
   .ex:hover { background: rgba(255,255,255,.07); }
-  .ex .nm { flex: 1; min-width: 0; }
+  .ex .nm { min-width: 0; }
   .ex .nm b { display: block; font-size: 13.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .ex .nm small { display: block; font-size: 11.5px; color: var(--faint); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .ex.done .nm b { color: var(--faint); text-decoration: line-through; }
-  .ex .kg { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
-  .ex .kg b { font-size: 14px; font-weight: 700; }
-  .ex .kg small { display: block; font-size: 11px; font-weight: 600; color: var(--green); }
-  .ex .acts { display: flex; gap: 3px; opacity: 0; transition: opacity .15s; }
+  .ex .kg { text-align: center; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .ex .kg b { display: block; font-size: 14px; font-weight: 700; }
+  .ex .kg small { display: block; font-size: 11px; color: var(--faint); }
+  .ex .reps { width: 100%; box-sizing: border-box; text-align: center; padding: 6px 4px; border-radius: 9px; border: 1px solid var(--hair); background: rgba(255,255,255,.06); color: #fff; font: inherit; font-size: 13px; font-weight: 600; outline: none; -moz-appearance: textfield; }
+  .ex .reps::-webkit-inner-spin-button { -webkit-appearance: none; }
+  .ex .reps:focus { border-color: var(--c); background: rgba(255,255,255,.1); }
+  .ex .st { all: unset; box-sizing: border-box; text-align: center; padding: 5px 8px; border-radius: 99px; font-size: 11.5px; font-weight: 700; white-space: nowrap; color: var(--faint); background: rgba(255,255,255,.05); }
+  .ex .st.up { cursor: pointer; color: #04210f; background: var(--green); box-shadow: 0 0 0 3px rgba(48,209,88,.18); }
+  .ex .st.up:hover { filter: brightness(1.1); }
+  .ex .st.hold { color: var(--yellow); background: rgba(255,214,10,.13); }
+  .ex .st.low { color: var(--red); background: rgba(255,69,58,.13); }
+  .ex .acts { display: flex; gap: 3px; justify-content: flex-end; opacity: 0; transition: opacity .15s; }
   .ex:hover .acts { opacity: 1; }
   .ex .acts button { all: unset; cursor: pointer; width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; font-size: 11px; background: rgba(255,255,255,.12); }
   .ex .acts button:hover { background: rgba(255,255,255,.26); }
-  .ex .acts button[data-a="hit"] { color: var(--green); }
-  .wadd { flex: none; display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1.4fr) 56px 56px auto; gap: 6px; }
+  .whint { flex: none; font-size: 11.5px; color: var(--faint); text-align: center; }
+  .wadd { flex: none; display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1.2fr) 64px 64px auto; gap: 6px; }
   .wadd .btn { padding: 8px 12px; }
+  #v-physical { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); }
+  #v-physical #gWork { grid-row: auto; padding: 20px 24px; }
+
+  /* ---------- financial title cards ---------- */
+  #v-financial { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .fcard { font: inherit; color: inherit; text-align: left; text-decoration: none; box-sizing: border-box; cursor: pointer; background: rgba(28,28,32,.62); border: 1px solid var(--stroke); -webkit-backdrop-filter: blur(40px) saturate(180%); backdrop-filter: blur(40px) saturate(180%); display: flex; flex-direction: column; justify-content: space-between; gap: 12px; padding: 22px; border-radius: var(--r); min-height: 0; overflow: hidden; position: relative; transition: transform .25s cubic-bezier(.22,1,.36,1), background .25s; }
+  .fcard::before { content: ""; position: absolute; inset: 0; background: radial-gradient(120% 80% at 0% 0%, color-mix(in srgb, var(--c) 26%, transparent), transparent 60%); opacity: .8; pointer-events: none; transition: opacity .25s; }
+  .fcard:hover { transform: translateY(-4px); background: rgba(36,36,42,.7); }
+  .fcard:hover::before { opacity: 1; }
+  .fcard > * { position: relative; }
+  .fcard .fi { width: 54px; height: 54px; border-radius: 16px; display: grid; place-items: center; font-size: 28px; background: color-mix(in srgb, var(--c) 22%, rgba(255,255,255,.06)); }
+  .fcard .ft b { display: block; font-size: 20px; font-weight: 750; letter-spacing: -.02em; line-height: 1.15; }
+  .fcard .ft small { display: block; margin-top: 6px; font-size: 12.5px; color: var(--faint); line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .fcard .fgo { align-self: flex-start; font-size: 12px; font-weight: 700; padding: 6px 12px; border-radius: 99px; background: rgba(255,255,255,.1); color: color-mix(in srgb, var(--c) 60%, #fff); transition: background .2s; }
+  .fcard:hover .fgo { background: rgba(255,255,255,.18); }
 
   /* ---------- charts ---------- */
   .vbars { flex: 1; min-height: 70px; position: relative; display: flex; gap: 8px; align-items: flex-end; padding-top: 14px; }
@@ -252,7 +292,20 @@
   .hbar b { text-align: right; font-variant-numeric: tabular-nums; }
   .split { display: flex; height: 26px; border-radius: 9px; overflow: hidden; font-size: 11.5px; font-weight: 700; }
   .split div { display: grid; place-items: center; background: var(--c); color: #111; }
-  .months { display: grid; grid-template-columns: repeat(8, 1fr); gap: 4px; }
+  #v-goals { grid-template-columns: minmax(0, .6fr) minmax(0, 2fr) minmax(0, 1fr); }
+  .grind { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; min-height: 0; }
+  .grind > .scroll { display: flex; flex-direction: column; gap: 12px; min-height: 0; }
+  .mcol { display: flex; flex-direction: column; gap: 10px; min-height: 0; }
+  .mnav { display: flex; align-items: center; gap: 8px; }
+  .mnav button { flex: none; width: 28px; height: 28px; border-radius: 50%; border: 0; background: rgba(255,255,255,.1); color: #fff; font-size: 17px; line-height: 1; cursor: pointer; transition: background .2s; }
+  .mnav button:hover:not(:disabled) { background: rgba(255,255,255,.2); }
+  .mnav button:disabled { opacity: .3; cursor: default; }
+  #mName { flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 15px; }
+  #mName em { font-style: normal; font-size: 12px; color: var(--faint); }
+  .mcol .tag { font-size: 10.5px; font-weight: 700; padding: 2px 7px; border-radius: 99px; background: var(--green); color: #04210f; }
+  .mcol .tag.past { background: rgba(48,209,88,.22); color: #b6f5c6; }
+  .mcol .none { font-size: 12px; color: var(--faint); text-align: center; margin-top: 6px; }
+  .months { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
   .months div { text-align: center; padding: 6px 0; border-radius: 8px; font-size: 11px; font-weight: 700; background: rgba(255,255,255,.06); color: var(--faint); }
   .months div.past { background: rgba(48,209,88,.22); color: #b6f5c6; }
   .months div.now { background: var(--green); color: #04210f; }
@@ -340,7 +393,7 @@
   </header>
 
   <main class="stage">
-    <!-- TODAY: Daily/Weekly -->
+    <!-- DAILY/WEEKLY -->
     <section class="view" id="v-today">
       <div class="w glass" id="todayCard">
         <div class="wh"><span class="ttl"><i class="dot" style="color:var(--green)"></i>Daily Tasks</span><div class="side-r"><span id="gDate"></span><button class="open" data-open="daily-tasks" title="Open full page">↗</button></div></div>
@@ -366,61 +419,31 @@
     <section class="view" id="v-goals">
       <div class="w glass tall" id="gEnd"></div>
       <div class="w glass tall" id="gGrind"></div>
-      <div class="w glass" id="gTargets"></div>
-      <div class="w glass" id="gWeekly"></div>
+      <div class="w glass tall" id="gWeekly"></div>
     </section>
 
     <!-- PHYSICAL -->
     <section class="view" id="v-physical">
       <div class="w glass tall" id="gWork">
         <div class="wh"><span class="ttl"><i class="dot" id="wDot"></i><span id="wTitle">Gym</span></span><div class="side-r"><div class="wtabs" id="wTabs"></div><button class="open" data-open="gym" title="Open full page">↗</button></div></div>
-        <div class="wprog"><span id="wCount"></span><div class="track"><i id="wBar"></i></div><span class="hint">↑ when you hit next week's weight</span></div>
+        <div class="wsplit" id="wSplit"></div>
+        <div class="wstats" id="wStats"></div>
+        <div class="whead"><span></span><span>Exercise</span><span>This week</span><span>Next week</span><span>Reps</span><span>Status</span><span></span></div>
         <div class="wlist" id="wList"></div>
+        <div class="whint">Log your top-set reps · hit the top of the range and it's time to go up ↑</div>
         <form class="wadd" id="wAdd">
           <input class="input" id="aName" placeholder="Exercise" maxlength="40" autocomplete="off">
           <input class="input" id="aSets" placeholder="Sets" maxlength="30" autocomplete="off">
           <input class="input" id="aKg" type="number" step="0.25" min="0" placeholder="kg">
-          <input class="input" id="aNext" type="number" step="0.25" min="0" placeholder="next">
+          <input class="input" id="aRange" placeholder="6-8" maxlength="7" autocomplete="off">
           <button class="btn" title="Add exercise">+</button>
         </form>
       </div>
-      <div class="w glass" id="pBulk"></div>
-      <div class="w glass" id="pFoot"></div>
-      <div class="w glass" id="pCare"></div>
-      <div class="w glass" id="pLooks"></div>
     </section>
 
-    <!-- MONEY -->
-    <section class="view" id="v-money">
-      <div class="w glass" id="mOut"></div>
-      <div class="w glass tall" id="mWard"></div>
-      <div class="w glass" id="mResell"></div>
-      <div class="w glass" id="mWish"></div>
-      <div class="w glass" id="mIdeas"></div>
-    </section>
+    <!-- FINANCIAL — every page as a title card; click opens it in full -->
+    <section class="view" id="v-financial"></section>
 
-    <!-- CONTENT -->
-    <section class="view" id="v-content">
-      <div class="w glass tall" id="cFlux"></div>
-      <div class="w glass" id="cPages"></div>
-      <div class="w glass tall" id="cDev"></div>
-      <div class="w glass" id="cInf"></div>
-    </section>
-
-    <!-- RELATIONSHIPS -->
-    <section class="view" id="v-rel">
-      <div class="w glass" id="rFamily"></div>
-      <div class="w glass" id="rGirls"></div>
-      <div class="w glass" id="rFriends"></div>
-      <div class="w glass" id="rDates" style="grid-column: 1 / -1"></div>
-    </section>
-
-    <!-- MIND -->
-    <section class="view" id="v-mind">
-      <div class="w glass tall" id="dDetox"></div>
-      <div class="w glass tall" id="dMH"></div>
-      <div class="w glass tall" id="dBooks"></div>
-    </section>
   </main>
 
   <footer class="dockwrap"><nav class="dock glass" id="dock"></nav></footer>
@@ -757,42 +780,44 @@ function renderRoutine(id, slug, title, color, pm) {
 }
 
 /* =====================================================================
-   GOALS — The End Goal, October → May grind, weekly goals, targets
+   GOALS — The End Goal stats, Nov → May grind, weekly goals
    ===================================================================== */
 function renderGoalsView() {
   const end = pg("the-end-goal").md, grind = pg("october-to-may-grind").md;
-  // The End Goal
-  const tiers = [...end.matchAll(/£(\d+)( a month| once)? for ([^,.]+)/g)].map(m => ({ price: "£" + m[1] + (m[2] === " a month" ? "/mo" : m[2] === " once" ? " once" : ""), what: m[3].replace(/ out of the ones selected/, "") }));
-  const income = bullets((end.split("Our Income Sources:")[1] || "").split(/\n#/)[0]);
-  const cols = [["Physical", "var(--orange)"], ["Financial", "var(--green)"], ["Personal", "var(--blue)"]].map(([h, c]) => `<div class="mini"><h5 style="color:${c}">${h}</h5><ul>${bullets(under(end, new RegExp("^" + h + "$"))).map(b => `<li>${mdInline(b)}</li>`).join("")}</ul></div>`).join("");
-  const timeline = bullets(under(end, /^Timeline$/));
-  const days21 = Math.max(0, Math.round((new Date(2029, 4, 1) - new Date()) / 864e5));
-  $("gEnd").innerHTML = head("The End Goal · Age 21", "var(--yellow)", "the-end-goal") + `<div class="scroll">
-    <div class="g2"><div class="stat mini"><b style="color:var(--yellow)">£10K</b><small>a month — the main goal</small></div><div class="stat mini"><b>${days21.toLocaleString()}</b><small>days until May 2029</small></div></div>
-    <div><div class="cap" style="margin-bottom:6px">Targets</div><div class="g3">${cols}</div></div>
-    <div><div class="cap" style="margin-bottom:6px">Income sources</div><div class="chips">${income.map(b => `<span class="chip c" style="--c:var(--green)">${mdInline(b)}</span>`).join("")}</div></div>
-    ${tiers.length ? `<div><div class="cap" style="margin-bottom:6px">Course tiers</div><div class="g2">${tiers.map(t => `<div class="mini stat"><b style="font-size:19px">${t.price}</b><small>${esc(t.what)}</small></div>`).join("")}</div></div>` : ""}
-    <div><div class="cap" style="margin-bottom:6px">Timeline</div><ol class="tl">${timeline.map(t => `<li style="--c:var(--yellow)">${mdInline(t)}</li>`).join("")}</ol></div>
-    <div class="mini"><h5>🛡️ Cyber Security Backup — Plan B</h5><ul>${bullets(under(end, /^Cyber Security Backup$/)).map(b => `<li>${mdInline(b)}</li>`).join("")}</ul></div>
-    <div class="mini"><h5>🌍 Goals</h5><ul>${bullets(under(end, /^Goals$/, true)).map(b => `<li>${mdInline(b)}</li>`).join("")}</ul></div>
-  </div>`;
+  // The End Goal — headline stats only
+  const stats = [["£10K", "a month — the main goal", "var(--yellow)", /10K A MONTH/i], ["£10K", "saved for travelling", "var(--green)", /./], ["£25k+", "car", "var(--blue)", /25k\+ car/i],
+    ["Level 6", "bachelor's degree in cyber — plan B", "var(--pink)", /level 6/i], ["75–80kg", "physique", "var(--orange)", /75-80kg/i]]
+    .filter(h => h[3].test(end));
+  $("gEnd").innerHTML = head("The End Goal", "var(--yellow)", "the-end-goal") +
+    `<div class="fill" style="display:grid;grid-auto-rows:1fr;gap:8px">${stats.map(h => `<div class="mini stat" style="display:flex;flex-direction:column;justify-content:center;text-align:center"><b style="color:${h[2]};font-size:24px">${h[0]}</b><small style="font-size:11px">${h[1]}</small></div>`).join("")}</div>`;
 
-  // October → May grind
-  const mNames = ["Oct", "Nov", "Dec", "Jan", "Feb", "Mar", "Apr", "May"], mi = (new Date().getMonth() + 3) % 12;  // Oct = 0
-  const groups = tasksByHeading(grind);
-  $("gGrind").innerHTML = head("October → May Grind", "var(--green)", "october-to-may-grind") +
-    `<div class="months">${mNames.map((m, i) => `<div class="${i < mi ? "past" : i === mi ? "now" : ""}">${m}</div>`).join("")}</div>
-     <div class="scroll">${groups.map(g => {
-       const n = g.tasks.filter(t => t.done).length;
-       return `<div><div class="prow"><b style="font-size:13.5px">${esc(g.h)}</b><em>${n}/${g.tasks.length}</em><div class="pbar"><i style="--p:${n / g.tasks.length * 100}%"></i></div></div>
-         <ul class="rows" style="margin-top:4px">${g.tasks.map(t => `<li><span class="ck${t.done ? " on" : ""}"></span><span>${mdInline(t.t)}</span></li>`).join("")}</ul></div>`;
-     }).join("")}</div>`;
-
-  // headline numbers pulled from the goal pages
-  const hits = [["£10K", "a month by 21", /10K A MONTH/i], ["£30K", "saved between 18–21", /30K saved/i], ["£1K", "a month by May", /£1k\/month/i],
-    ["75–80kg", "aesthetic physique", /75-80kg/i], ["70kg", "by May (57kg start)", /70KG/i], ["£25k+", "car", /25k\+ car/i]]
-    .filter(h => h[2].test(end + grind));
-  $("gTargets").innerHTML = head("The numbers", "var(--pink)", null) + `<div class="g3 fill" style="grid-auto-rows:1fr">${hits.map(h => `<div class="mini stat"><b>${h[0]}</b><small>${h[1]}</small></div>`).join("")}</div>`;
+  // November → May grind — goals on the left, one month at a time on the right (Notion's "October" section is the first month)
+  const MONTHS = ["November", "December", "January", "February", "March", "April", "May"];
+  const mo = new Date().getMonth(), mi = mo >= 10 ? mo - 10 : mo <= 4 ? mo + 2 : -1;  // Nov = 0, -1 before it starts
+  const all = tasksByHeading(grind), isMonth = h => h === "October" || MONTHS.includes(h);
+  const byMonth = Object.fromEntries(all.filter(g => isMonth(g.h)).map(g => [g.h === "October" ? "November" : g.h, g.tasks]));
+  const goalGroups = all.filter(g => !isMonth(g.h));
+  const ticks = ts => `<ul class="rows" style="margin-top:4px">${ts.map(t => `<li><span class="ck${t.done ? " on" : ""}"></span><span>${mdInline(t.t)}</span></li>`).join("")}</ul>`;
+  $("gGrind").innerHTML = head("November → May Grind", "var(--green)", "october-to-may-grind") +
+    `<div class="grind fill">
+       <div class="scroll"><div class="cap">Goals</div>${goalGroups.map(g => {
+         const n = g.tasks.filter(t => t.done).length;
+         return `<div><div class="prow"><b style="font-size:13.5px">${esc(g.h)}</b><em>${n}/${g.tasks.length}</em><div class="pbar"><i style="--p:${n / g.tasks.length * 100}%"></i></div></div>${ticks(g.tasks)}</div>`;
+       }).join("")}</div>
+       <div class="mcol"><div class="mnav"><button data-m="-1" aria-label="Previous month">‹</button><div id="mName"></div><button data-m="1" aria-label="Next month">›</button></div><div class="scroll" id="mBody"></div></div>
+     </div>`;
+  let sel = Math.max(0, mi);
+  const showMonth = () => {
+    const m = MONTHS[sel], ts = byMonth[m];
+    $("mName").innerHTML = `<b>${m}</b>${sel === mi ? `<span class="tag">Now</span>` : sel < mi ? `<span class="tag past">Done</span>` : ""}${ts ? `<em>${ts.filter(t => t.done).length}/${ts.length}</em>` : ""}`;
+    $("mBody").innerHTML = ts ? ticks(ts) : `<p class="none">Nothing planned yet</p>`;
+    $("gGrind").querySelectorAll("[data-m]").forEach(b => b.disabled = sel + +b.dataset.m < 0 || sel + +b.dataset.m >= MONTHS.length);
+  };
+  $("gGrind").querySelectorAll("[data-m]").forEach(b => b.onclick = () => {
+    sel = Math.min(MONTHS.length - 1, Math.max(0, sel + +b.dataset.m)); showMonth();
+    if (M) M.animate("#mBody", { opacity: [0, 1], x: [+b.dataset.m * 14, 0] }, { duration: .35, ease });
+  });
+  showMonth();
 
   // weekly goals
   const wg = pg("weekly-goals").db ? [...pg("weekly-goals").db.rows].sort((a, b) => a[1] < b[1] ? -1 : 1) : [];
@@ -801,7 +826,7 @@ function renderGoalsView() {
 }
 
 /* =====================================================================
-   PHYSICAL — gym workouts, bulking, football, today's care, looksmaxxing
+   PHYSICAL — gym tracker with progressive overload
    ===================================================================== */
 let gym = Object.assign({ log: {}, lifts: [], plans: {} }, store.get("gym", {}));
 const saveGym = () => store.set("gym", gym);
@@ -814,13 +839,28 @@ const typeColor = t => (GYM.find(g => g[0] === t) || [, , "var(--gray)"])[2];
     if (!NP[slug] || (gym.plans[type] && gym.plans[type].length)) return;
     gym.plans[type] = NP[slug].db.rows.filter(r => r[0]).map(r => {
       const kg = num(r[2]), next = num(String(r[3]).split("|")[0]);
-      return { id: uid(), name: r[0], sets: r[1], kg, next: next || kg, reps: (String(r[3]).split("|")[1] || "").trim(), on: r[5] };
+      return { id: uid(), name: r[0], sets: r[1], kg, next: next || kg, reps: (String(r[3]).split("|")[1] || "").trim(), on: r[5], start: +(kg - num(r[4])).toFixed(2) };
     });
     changed = true;
   });
+  // progressive overload model: rep range, weight step and starting weight for every exercise
+  gym.reps = gym.reps || {};                                 // { "YYYY-MM-DD": { exerciseId: topSetReps } }
+  Object.entries(gym.plans).forEach(([type, list]) => list.forEach(e => {
+    const src = GYM.find(g => g[0] === type), row = src && NP[src[1]] && NP[src[1]].db.rows.find(r => r[0] === e.name);
+    if (e.start == null) { e.start = row ? +(num(row[2]) - num(row[4])).toFixed(2) : e.kg; changed = true; }
+    if (!e.range) { e.range = repRange(e.reps || e.sets); changed = true; }
+    if (!e.step) { e.step = e.next > e.kg ? +(e.next - e.kg).toFixed(2) : 2.5; changed = true; }
+  }));
   if (changed) saveGym();
 })();
 const kgf = n => String(+(+n).toFixed(2));
+function repRange(t) {                                       // "6-8 Reps" → [6, 8], "3 sets of 12" → [10, 12], else [6, 8]
+  const m = String(t || "").match(/(\d+)\s*[-–]\s*(\d+)\s*reps?/i) || String(t || "").match(/(\d+)\s*reps?/i);
+  if (m) return [+m[1], +(m[2] || m[1])];
+  const o = String(t || "").match(/of\s*(\d+)/i); return o ? [Math.max(1, +o[1] - 2), +o[1]] : [6, 8];
+}
+const lastReps = (id, before) => { const d = Object.keys(gym.reps).filter(k => k < before && gym.reps[k][id] != null).sort().pop(); return d ? gym.reps[d][id] : null; };
+const verdict = (e, r) => r == null ? null : r >= e.range[1] ? "up" : r >= e.range[0] ? "hold" : "low";
 // today's gym session according to the Notion Weekly Plan ("Gym (arms)" etc.)
 function plannedGym(dayName = todayName()) {
   const day = pg("weekly-plan").db && pg("weekly-plan").db.days.find(d => d.day === dayName);
@@ -834,35 +874,71 @@ function syncGymTask(k, v) {
   setGoal(k, g.id, v); renderGoals(); renderTracker();
 }
 function renderWork(fx) {
-  const k = todayKey(), list = gym.plans[wType] || [], isToday = plannedGym() === wType, done = gym.sess[k] || {}, c = typeColor(wType);
+  const k = todayKey(), list = gym.plans[wType] || [], isToday = plannedGym() === wType, done = gym.sess[k] || {}, reps = gym.reps[k] || {}, c = typeColor(wType);
+  $("gWork").style.setProperty("--c", c);
   $("wDot").style.color = c;
-  $("wTitle").textContent = isToday ? `Gym · today is ${wType}` : `Gym · ${wType}`;
+  $("wTitle").textContent = isToday ? `Gym · today is ${wType}` : plannedGym() ? `Gym · ${wType}` : `Gym · ${wType} · rest day today`;
   $("wTabs").innerHTML = GYM.map(([t]) => `<button data-t="${esc(t)}" class="${t === wType ? "on" : ""}" style="--c:${typeColor(t)}">${esc(t)}</button>`).join("");
   $("wTabs").querySelectorAll("button").forEach(b => b.onclick = () => { wType = b.dataset.t; renderWork({ swap: true }); });
+  // weekly split from the Notion Weekly Plan — click a day to open that workout
+  $("wSplit").innerHTML = DAYS.map(d => { const t = plannedGym(d); return `<button class="${t ? "" : "rest"}${d === todayName() ? " today" : ""}${t === wType ? " on" : ""}" data-t="${t ? esc(t) : ""}" style="--c:${t ? typeColor(t) : "var(--gray)"}" title="${d}">${d.slice(0, 3)}${d === todayName() ? " · today" : ""}<b>${t ? esc(t) : "Rest"}</b></button>`; }).join("");
+  $("wSplit").querySelectorAll("button:not(.rest)").forEach(b => b.onclick = () => { if (b.dataset.t !== wType) { wType = b.dataset.t; renderWork({ swap: true }); } });
+
+  // session stats
   const n = list.filter(e => done[e.id]).length;
-  $("wCount").textContent = list.length ? `${n} of ${list.length} done` : "No exercises";
-  $("wBar").style.background = c; $("wBar").style.width = list.length ? n / list.length * 100 + "%" : "0";
+  const ready = list.filter(e => verdict(e, reps[e.id] ?? lastReps(e.id, k)) === "up").length;
+  const added = list.reduce((t, e) => t + (e.kg - (e.start ?? e.kg)), 0);
+  const names = new Set(list.map(e => e.name)), month = new Date(Date.now() - 30 * 864e5).toISOString().slice(0, 10);
+  const ups = gym.lifts.filter(l => names.has(l.ex) && l.d >= month).length;
+  $("wStats").innerHTML = `<div class="mini"><b>${n}<span style="color:var(--faint);font-size:14px">/${list.length}</span></b><small>done today</small><div class="track"><i style="width:${list.length ? n / list.length * 100 : 0}%;background:${c}"></i></div></div>
+    <div class="mini"><b style="color:${ready ? "var(--green)" : "inherit"}">${ready}</b><small>ready to go up ↑</small></div>
+    <div class="mini"><b>+${kgf(added)}<span style="font-size:13px"> kg</span></b><small>added since start</small></div>
+    <div class="mini"><b>${ups}</b><small>level-ups · 30 days</small></div>`;
+
   const box = $("wList"); box.innerHTML = "";
   if (!list.length) box.innerHTML = `<div class="empty">No ${esc(wType.toLowerCase())} exercises</div>`;
   list.forEach((e, i) => {
+    const r = reps[e.id], prev = lastReps(e.id, k), v = verdict(e, r ?? prev), nextKg = +(e.kg + e.step).toFixed(2);
+    const [lo, hi] = e.range, rng = lo === hi ? `${hi} reps` : `${lo}–${hi} reps`;
+    const st = v === "up" ? `<button class="st up" data-a="hit" title="Move up to ${kgf(nextKg)} kg">↑ Go up</button>`
+      : v === "hold" ? `<span class="st hold" title="Stay at ${kgf(e.kg)} kg and add reps">Hold · +reps</span>`
+      : v === "low" ? `<span class="st low" title="Below ${lo} reps — repeat ${kgf(e.kg)} kg">Repeat</span>`
+      : `<span class="st" title="Hit ${hi} reps to move up to ${kgf(nextKg)} kg">Hit ${hi} reps</span>`;
     const row = document.createElement("div"); row.className = "ex" + (done[e.id] ? " done" : ""); row.dataset.id = e.id;
     row.innerHTML = `<div class="check"></div><div class="nm"><b></b><small></small></div>
-      <div class="kg">${e.kg ? `<b>${kgf(e.kg)} kg</b><small>→ ${kgf(e.next)} kg${e.reps ? " · " + esc(e.reps) : ""}</small>` : `<b style="color:var(--faint)">—</b>`}</div>
-      <div class="acts"><button data-a="hit" title="Hit next week's weight">↑</button><button data-a="edit" title="Edit">✎</button><button data-a="del" title="Remove">×</button></div>`;
+      <div class="kg">${e.kg ? `<b>${kgf(e.kg)} kg</b>` : `<b style="color:var(--faint)">—</b>`}<small>${rng}</small></div>
+      <div class="kg nx">${e.kg ? `<b>${kgf(nextKg)} kg</b><small>+${kgf(e.step)} kg</small>` : `<b style="color:var(--faint)">—</b>`}</div>
+      <input class="reps" type="number" min="0" max="99" inputmode="numeric" value="${r ?? ""}" placeholder="${prev ?? "reps"}" title="${prev != null ? `Last time: ${prev} reps` : "Top-set reps"}">
+      ${st}<div class="acts"><button data-a="edit" title="Edit">✎</button><button data-a="del" title="Remove">×</button></div>`;
     row.querySelector(".nm b").textContent = e.name;
-    row.querySelector(".nm small").textContent = e.sets + (e.on ? ` · since ${short(parseDay(e.on))}` : "");
+    row.querySelector(".nm small").textContent = e.sets + (e.on ? ` · ${kgf(e.kg)} kg since ${short(parseDay(e.on))}` : "");
+    const inp = row.querySelector(".reps");
+    inp.onclick = ev => ev.stopPropagation();
+    inp.onkeydown = ev => { if (ev.key === "Enter") { ev.preventDefault(); inp.blur(); } };
+    inp.onchange = () => {
+      const val = inp.value === "" ? null : Math.max(0, Math.round(+inp.value));
+      gym.reps[k] = gym.reps[k] || {}; gym.sess[k] = done;
+      if (val == null) delete gym.reps[k][e.id]; else { gym.reps[k][e.id] = val; done[e.id] = true; }
+      saveGym();
+      if (isToday && list.every(x => done[x.id])) syncGymTask(k, true);
+      renderWork({ logged: e.id, focus: i + 1 });
+    };
     row.onclick = ev => {
-      const a = ev.target.dataset.a;
+      const a = ev.target.closest("[data-a]")?.dataset.a;
       if (a === "hit") {
-        const step = e.next > e.kg ? e.next - e.kg : 2.5;
-        gym.lifts.push({ id: uid(), d: k, ex: e.name, kg: e.next, reps: 0 });
-        e.kg = e.next; e.next = +(e.next + step).toFixed(2); e.on = k; saveGym(); renderWork({ hit: e.id }); return;
+        gym.lifts.push({ id: uid(), d: k, ex: e.name, kg: nextKg, from: e.kg });
+        e.kg = nextKg; e.next = +(nextKg + e.step).toFixed(2); e.on = k;
+        if (gym.reps[k]) delete gym.reps[k][e.id];          // fresh start at the new weight
+        Object.keys(gym.reps).forEach(d => { if (d < k) delete gym.reps[d][e.id]; });
+        saveGym(); renderWork({ hit: e.id }); return;
       }
       if (a === "edit") {
-        const v = prompt(`Edit ${e.name} — sets · weight · next`, `${e.sets} · ${kgf(e.kg)} · ${kgf(e.next)}`); if (!v) return;
-        const [sets, kg, next] = v.split("·").map(x => x.trim());
-        if (sets) e.sets = sets; if (parseFloat(kg) >= 0) e.kg = parseFloat(kg); if (parseFloat(next) >= 0) e.next = parseFloat(next);
-        saveGym(); renderWork(); return;
+        const val = prompt(`Edit ${e.name} — sets · weight kg · rep range · step kg`, `${e.sets} · ${kgf(e.kg)} · ${lo}-${hi} · ${kgf(e.step)}`); if (!val) return;
+        const [sets, kg, range, step] = val.split("·").map(x => x.trim());
+        if (sets) e.sets = sets; if (parseFloat(kg) >= 0) e.kg = parseFloat(kg);
+        if (range) e.range = repRange(/rep/i.test(range) ? range : range + " reps");
+        if (parseFloat(step) > 0) e.step = parseFloat(step);
+        e.next = +(e.kg + e.step).toFixed(2); saveGym(); renderWork(); return;
       }
       if (a === "del") { if (confirm(`Remove ${e.name} from ${wType}?`)) { list.splice(i, 1); saveGym(); renderWork(); } return; }
       gym.sess[k] = done; done[e.id] = !done[e.id]; saveGym();
@@ -871,194 +947,43 @@ function renderWork(fx) {
     };
     box.appendChild(row);
   });
+  if (fx && fx.focus != null) { const nx = box.querySelectorAll(".reps")[fx.focus]; if (nx && !nx.value) nx.focus(); }
   if (!M || !fx) return;
   if (fx.pop) pop(box.querySelector(`[data-id="${fx.pop}"] .check`));
-  if (fx.hit) M.animate(box.querySelector(`[data-id="${fx.hit}"] .kg`), { scale: [1.25, 1] }, { duration: .5, ease });
+  if (fx.logged) pop(box.querySelector(`[data-id="${fx.logged}"] .st`));
+  if (fx.hit) M.animate(box.querySelector(`[data-id="${fx.hit}"] .kg`), { scale: [1.3, 1] }, { duration: .5, ease });
   if (fx.add) M.animate(box.querySelector(`[data-id="${fx.add}"]`), { opacity: [0, 1], x: [-16, 0] }, spring);
   if (fx.swap) M.animate(box.children, { opacity: [0, 1], y: [8, 0] }, { delay: M.stagger(.025), duration: .35, ease });
 }
 $("wAdd").onsubmit = ev => {
   ev.preventDefault();
   const name = $("aName").value.trim(); if (!name) return;
-  const kg = parseFloat($("aKg").value) || 0, next = parseFloat($("aNext").value) || kg + 2.5;
-  const e = { id: uid(), name, sets: $("aSets").value.trim() || "3 sets of 12", kg, next, on: todayKey() };
+  const kg = parseFloat($("aKg").value) || 0, range = repRange(($("aRange").value.trim() || "6-8") + " reps");
+  const e = { id: uid(), name, sets: $("aSets").value.trim() || "3 sets", kg, step: 2.5, next: kg + 2.5, range, start: kg, on: todayKey() };
   (gym.plans[wType] = gym.plans[wType] || []).push(e); saveGym();
-  ["aName", "aSets", "aKg", "aNext"].forEach(id => $(id).value = ""); $("aName").focus();
+  ["aName", "aSets", "aKg", "aRange"].forEach(id => $(id).value = ""); $("aName").focus();
   renderWork({ add: e.id });
 };
 
-function renderPhysical() {
-  // Bulking Method: calories + protein per day against the daily target, rules, shopping list
-  const bulk = pg("bulking-method").md, rows = tableRows(bulk), dayHdr = rows[0] ? rows[0].slice(1) : [];
-  const cal = (rows.find(r => /Total Calories/i.test(r[0])) || []).slice(1).map(Number);
-  const pro = (rows.find(r => /Total Protein/i.test(r[0])) || []).slice(1);
-  const target = +(bulk.match(/([\d.]+)k Calories daily/i) || [, 3.4])[1] * 1000;
-  const top = Math.max(target, ...cal) * 1.05;
-  const pre = bulk.split(/^# Meal Plan/m)[0], rules = bullets(pre.slice(pre.lastIndexOf("- [")).split("\n").slice(1).join("\n"));
-  const shop = tasksByHeading(bulk).filter(g => !/Stock-Up/i.test(g.h)), all = shop.flatMap(g => g.tasks), need = all.filter(t => !t.done);
-  $("pBulk").innerHTML = head("Bulking Method", "var(--orange)", "bulking-method", `<span class="hint">┄ ${(target / 1000).toFixed(1)}k cal target</span>`) +
-    `<div class="vbars">${cal.map((v, i) => `<div class="b${dayHdr[i] === todayName() ? " today" : ""}" title="${v} cal · ${esc(pro[i])} protein"><span>${(v / 1000).toFixed(1)}k</span><div class="bw"><i style="height:${v / top * 100}%"></i><u style="bottom:${target / top * 100}%"></u></div>${esc((dayHdr[i] || "").slice(0, 3))}<span style="color:var(--teal)">${esc(pro[i] || "")}</span></div>`).join("")}</div>
-     <div class="chips">${rules.map(r => `<span class="chip">${mdInline(r)}</span>`).join("")}</div>
-     <div class="prow"><span>🛒 Shopping list · still need ${need.map(t => esc(strip(t.t).split(" — ")[0])).join(", ") || "nothing"}</span><em>${all.length - need.length}/${all.length}</em><div class="pbar"><i style="--p:${(all.length - need.length) / Math.max(all.length, 1) * 100}%;--c:var(--orange)"></i></div></div>`;
-
-  // Football Routine: the week at a glance + today's session
-  const foot = pg("football-routine").md, fr = tableRows(foot), sched = fr[1] ? fr[1].slice(1) : [];
-  const fcol = s => /REST/.test(s) ? "var(--gray)" : /MATCH/.test(s) ? "var(--red)" : /SPEED/.test(s) ? "var(--teal)" : /FITNESS/.test(s) && !/FUND/.test(s) ? "var(--green)" : "var(--yellow)";
-  const todays = sched[DAYS.indexOf(todayName())] || "";
-  const sessionFor = name => { const whole = under(foot, new RegExp("^" + name.replace(/[&]/g, "\\&"), "i")); return whole ? [[name, whole]] : name.split(/\s*&\s*/).map(n => [n, under(foot, new RegExp("^" + n, "i"))]).filter(x => x[1]); };
-  const sess = /REST|MATCH/.test(todays) ? [] : sessionFor(todays);
-  $("pFoot").innerHTML = head("Football Routine", "var(--green)", "football-routine") +
-    `<div class="sched">${DAYS.map((d, i) => `<div class="${d === todayName() ? "today" : ""}" style="--c:${fcol(sched[i] || "")}">${d.slice(0, 3)}<b>${esc((sched[i] || "").replace("FUNDAMENTALS", "FUND."))}</b></div>`).join("")}</div>
-     <div class="scroll">${sess.length ? sess.map(([n, body]) => `<div class="mini"><h5>Today · ${esc(n)}</h5><ul>${bullets(body).slice(0, 8).map(b => `<li>${mdInline(b)}</li>`).join("")}</ul></div>`).join("")
-       : `<div class="mini"><h5>Today · ${esc(todays || "—")}</h5><p>${/REST/.test(todays) ? "Rest day — recover." : /MATCH/.test(todays) ? "Match day." : ""}</p></div>`}</div>`;
-
-  // Today's care: skincare (Clear Skin), toes, looksmaxxing day plan
-  const skin = tableRows(pg("clear-skin").md), d3 = todayName().slice(0, 3), srow = skin.find(r => strip(r[0]).startsWith(d3)) || [];
-  const toes = tableRows(pg("toes").md), ti = toes[0] ? toes[0].indexOf(todayName()) : -1, toeTasks = ti < 0 ? [] : toes.slice(1).map(r => r[ti]).filter(Boolean);
-  const lroutine = pg("looksmaxxing-routine").md, lday = under(lroutine, new RegExp("^" + todayName().toUpperCase()));
-  const lhead = (L(lroutine).find(l => new RegExp("^# " + todayName().toUpperCase()).test(l)) || "").replace(/^# \w+ — /, "");
-  const lrows = tableRows(lday).slice(1);
-  $("pCare").innerHTML = head(`Today's care · ${todayName()}`, "var(--pink)", "clear-skin") + `<div class="scroll">
-    <div class="g2"><div class="mini"><h5>☀️ Skin AM${/shave/.test(srow[0] || "") ? " · shave" : ""}</h5><p>${mdInline(srow[1] || "—")}</p></div><div class="mini"><h5>🌙 Skin PM</h5><p>${mdInline(srow[2] || "—")}</p></div></div>
-    <div class="mini" data-open="looksmaxxing-routine" style="cursor:pointer"><h5>👀 Looksmaxxing · ${esc(lhead || "Daily core routine")}</h5><div class="chips" style="margin-top:6px">${lrows.map(r => `<span class="chip">${mdInline(r[0])}${r[2] && r[2] !== "—" ? ` · ${mdInline(r[2])}` : ""}</span>`).join("")}</div></div>
-    <div class="mini" data-open="toes" style="cursor:pointer"><h5>🦶 Toes</h5><div class="chips" style="margin-top:6px">${toeTasks.map(t => `<span class="chip">${mdInline(t)}</span>`).join("") || "<span class='hint'>Nothing today</span>"}</div></div>
-  </div>`;
-
-  // Looksmaxxing Method library
-  const lm = pg("looksmaxxing-method");
-  $("pLooks").innerHTML = head("Looksmaxxing Method", "var(--purple)", "looksmaxxing-method") + `<div class="scroll">${lm.children.map(c => `${c.label ? `<div class="cap" style="margin-bottom:6px">${esc(c.label)}</div>` : ""}<div class="g2">${c.slugs.map(s => `<div class="tile" data-open="${s}"><span class="ti">${pg(s).icon}</span><span>${esc(pg(s).title)}</span></div>`).join("")}</div>`).join("")}</div>`;
-}
-
 /* =====================================================================
-   MONEY — outgoings, wishlist, wardrobe, reselling, money ideas
+   FINANCIAL — one page of title cards; each opens the full Notion page
    ===================================================================== */
 const money = s => parseFloat(String(s).replace(/[^\d.]/g, "")) || 0;
-function renderMoney() {
-  // Monthly Outgoings — donut of the three groups as written in Notion
-  const out = pg("monthly-outgoings").md, groups = tasksByHeading(out), totals = [...out.matchAll(/total \\\| £([\d.,]+)/gi)].map(m => money(m[1]));
-  const combined = (out.match(/COMBINED TOTAL\s*\n+\s*(£[\d,.]+)/) || [])[1];
-  const cols = ["var(--orange)", "var(--blue)", "var(--purple)", "var(--teal)"], sum = totals.reduce((a, b) => a + b, 0) || 1, C = 2 * Math.PI * 42;
-  let acc = 0;
-  const segs = totals.map((t, i) => { const len = t / sum * C, s = `<circle cx="60" cy="60" r="42" style="stroke:${cols[i]}" stroke-dasharray="${len - 2} ${C}" stroke-dashoffset="${-acc}"/>`; acc += len; return s; }).join("");
-  $("mOut").innerHTML = head("Monthly Outgoings", "var(--orange)", "monthly-outgoings") +
-    `<div class="donut"><div class="ctr"><svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="42" style="stroke:rgba(255,255,255,.08)"/>${segs}</svg><b>${esc(combined || "£" + sum)}<small>a month</small></b></div>
-     <div class="legend">${groups.map((g, i) => `<div style="--c:${cols[i]}"><i></i>${esc(g.h)}<b>£${totals[i] ?? ""}</b></div>`).join("")}</div></div>
-     <div class="scroll"><div class="g3">${groups.map((g, i) => `<div><div class="cap" style="color:${cols[i]};margin-bottom:4px">${esc(g.h)}</div><ul class="rows">${g.tasks.map(t => { const [n, v] = strip(t.t).split("|"); return `<li><span>${esc(n.trim())}</span><span class="r">${esc((v || "").trim())}</span></li>`; }).join("")}</ul></div>`).join("")}</div></div>`;
-
-  // Purchases Wishlist — spend per area
-  const wish = tasksByHeading(pg("purchases-wishlist").md).map(g => ({ ...g, sum: g.tasks.reduce((a, t) => a + money((t.t.match(/£\s?([\d.]+)/) || [])[1]), 0) }));
-  const wtot = (pg("purchases-wishlist").md.match(/Whole Total=(£[\d,.]+)/) || [])[1], wmax = Math.max(...wish.map(w => w.sum), 1);
-  $("mWish").innerHTML = head("Purchases Wishlist", "var(--pink)", "purchases-wishlist", `<span class="hint">${esc(wtot || "")} total</span>`) +
-    `<div style="display:flex;flex-direction:column;gap:8px">${wish.map((w, i) => `<div class="hbar" style="--c:${cols[i]};--p:${w.sum / wmax * 100}%"><span>${esc(w.h)}</span><div class="track"><i></i></div><b>£${w.sum}</b></div>`).join("")}</div>
-     <div class="scroll"><div class="chips">${wish.flatMap(w => w.tasks).map(t => `<span class="chip${t.done ? " off" : ""}">${mdInline(t.t)}</span>`).join("")}</div></div>`;
-
-  // Wardrobe — owned vs total per category, then what's still missing
-  const ward = tasksByHeading(pg("wardrobe").md), wn = ward.flatMap(g => g.tasks), have = wn.filter(t => t.done).length;
-  $("mWard").innerHTML = head("Wardrobe", "var(--teal)", "wardrobe", `<span class="hint">${have}/${wn.length} owned</span>`) +
-    `<div class="prow"><b style="font-size:13.5px">Full wardrobe complete</b><em>${Math.round(have / Math.max(wn.length, 1) * 100)}%</em><div class="pbar"><i style="--p:${have / Math.max(wn.length, 1) * 100}%;--c:var(--teal)"></i></div></div>
-     <div class="scroll">${ward.map(g => { const n = g.tasks.filter(t => t.done).length; return `<div><div class="prow"><span>${esc(g.h)}</span><em>${n}/${g.tasks.length}</em><div class="pbar"><i style="--p:${n / g.tasks.length * 100}%;--c:${n === g.tasks.length ? "var(--green)" : "var(--teal)"}"></i></div></div>
-       <div class="chips" style="margin-top:6px">${g.tasks.map(t => `<span class="chip${t.done ? "" : " c"}" style="--c:var(--yellow)">${t.done ? "✓ " : ""}${mdInline(t.t)}</span>`).join("")}</div></div>`; }).join("")}</div>`;
-
-  // Reselling Method — the Stüssy plan as numbers and a timeline
-  const st = pg("stussy-t-shirts-method").md, inv = bullets(under(st, /^Inventory$/));
-  const split = [...st.matchAll(/(\d+) tees → (\w+)/g)].map(m => [m[2], +m[1]]), sn = split.reduce((a, b) => a + b[1], 0) || 1;
-  const repr = bullets(under(st, /^Repricing schedule/));
-  $("mResell").innerHTML = head("Reselling · Stüssy tees", "var(--yellow)", "reselling-method") + `<div class="scroll">
-    <div class="g3">${inv.map(b => { const t = strip(b), m = t.match(/(£[\d.]+\+?|\d+ ×)/); return `<div class="mini stat"><b style="font-size:18px">${esc(m ? m[1].replace(" ×", "") : t)}</b><small>${esc(t.replace(m ? m[1] : "", "").replace(/[:×]/g, "").trim())}</small></div>`; }).join("")}</div>
-    <div class="split">${split.map(([p, n], i) => `<div style="flex:${n};--c:${i ? "var(--teal)" : "var(--red)"}">${n} → ${esc(p)}</div>`).join("")}</div>
-    <ol class="tl">${repr.map(r => { const [d, ...rest] = strip(r).split(":"); return `<li style="--c:var(--yellow)"><b>${esc(d)}</b><small>${esc(rest.join(":").trim())}</small></li>`; }).join("")}</ol>
-    <div class="mini"><h5>🏆 Day 30 win condition</h5><ul>${bullets(under(st, /^What success looks like/)).map(b => `<li>${mdInline(b)}</li>`).join("")}</ul></div>
-    <div class="g2">${[...pg("reselling-method").children[0].slugs, "crypto-method"].map(tileHTML).join("")}</div>
-  </div>`;
-
-  // Money Ideas
-  const blocks = pg("money-ideas").md.split(/\n\s*\n/).map(bullets).filter(b => b.length);
-  $("mIdeas").innerHTML = head("Money Ideas", "var(--green)", "money-ideas") + `<div class="scroll">
-    <div><div class="cap" style="margin-bottom:6px">Pages & brands</div><div class="chips">${(blocks[0] || []).map(b => `<span class="chip c" style="--c:var(--green)">${mdInline(b)}</span>`).join("")}</div></div>
-    <div><div class="cap" style="margin-bottom:4px">Ideas</div><ul class="rows">${(blocks[1] || []).map(b => `<li><span>💡</span><span>${mdInline(b)}</span></li>`).join("")}</ul></div>
-  </div>`;
-}
-
-/* =====================================================================
-   CONTENT — Flux, other pages, influence, full stack roadmap
-   ===================================================================== */
-function renderContent() {
-  const fx = pg("flux").md, accounts = [...fx.matchAll(/### \d\. \*\*(.+?)\*\*\s*\n+- (.+)/g)];
-  const formula = (fx.split("**The formula that connects all three:**")[1] || "").trim().split("\n")[0];
-  const sched = tableRows(fx), ti = sched[0] ? sched[0].indexOf(todayName()) : -1;
-  const ideas = bullets(under(fx, /^Content Ideas$/));
-  $("cFlux").innerHTML = head("Flux · FUT content", "var(--purple)", "flux") + `<div class="scroll">
-    <div class="quote">${mdInline(formula)}</div>
-    <div class="g3">${accounts.map((a, i) => `<div class="mini"><h5 style="color:${["var(--purple)", "var(--blue)", "var(--teal)"][i]}">${esc(a[1])}</h5><p>${mdInline(a[2])}</p></div>`).join("")}</div>
-    <div class="chips"><span class="chip">📺 YouTube · ${mdInline(bullets(under(fx, /YouTube$/))[0] || "")}</span><span class="chip">📸 Instagram · ${mdInline(bullets(under(fx, /Instagram$/))[0] || "")}</span></div>
-    <div><div class="cap" style="margin-bottom:6px">Posting schedule</div><div class="tbl"><table><thead><tr>${sched[0] ? sched[0].map((h, i) => `<th class="${i === ti ? "hl" : ""}">${esc(h.slice(0, 3) || "")}</th>`).join("") : ""}</tr></thead>
-      <tbody>${sched.slice(1).map(r => `<tr>${r.map((c, i) => `<td class="${i === ti ? "hl" : ""}">${i ? mdInline(c) : `<b>${mdInline(c)}</b>`}</td>`).join("")}</tr>`).join("")}</tbody></table></div></div>
-    <div><div class="cap" style="margin-bottom:4px">Content ideas · ${ideas.length}</div><ul class="rows">${ideas.map((b, i) => `<li><em style="min-width:20px">${i + 1}</em><span>${mdInline(b)}</span></li>`).join("")}</ul></div>
-  </div>`;
-
-  // the other content pages
-  const kids = pg("content").children.flatMap(c => c.slugs).filter(s => s !== "flux");
-  $("cPages").innerHTML = head("Content pages", "var(--red)", "content") + `<div class="scroll"><div class="g3" style="align-items:start">${kids.map(s => `<div class="mini" data-open="${s}" style="cursor:pointer"><h5>${pg(s).icon} ${esc(pg(s).title)}</h5>${bullets(pg(s).md).length ? `<ul>${bullets(pg(s).md).map(b => `<li>${mdInline(b)}</li>`).join("")}</ul>` : `<p>Empty in Notion</p>`}</div>`).join("")}</div></div>`;
-
-  // How to build Influence — the four pillars
-  const inf = pg("how-to-build-influence").md, pillars = bullets(inf).filter(b => /\\\|/.test(b)).map(b => b.split("\\|").map(x => x.trim()));
-  const lessons = L(inf).filter(l => /^## /.test(l)).map(l => strip(l.slice(3)).replace(/:$/, ""));
-  $("cInf").innerHTML = head("Personal Brand · How to build Influence", "var(--yellow)", "how-to-build-influence") + `<div class="scroll">
-    <div class="g2">${pillars.map((p, i) => `<div class="mini"><h5 style="color:${["var(--yellow)", "var(--orange)", "var(--green)", "var(--teal)"][i % 4]}">${esc(p[0])}</h5><p>${mdInline(p[1])}</p></div>`).join("")}</div>
-    <ul class="rows">${lessons.map(l => `<li><span>→</span><span>${esc(l)}</span></li>`).join("")}</ul>
-  </div>`;
-
-  // Full Stack Dev RoadMap — milestone timeline
-  const dev = pg("full-stack-dev-roadmap").db, today = todayKey(), dn = dev ? dev.rows.filter(r => r[2]).length : 0;
-  $("cDev").innerHTML = head("Full Stack Dev RoadMap", "var(--blue)", "full-stack-dev-roadmap", `<span class="hint">${dn}/${dev ? dev.rows.length : 0} done</span>`) +
-    `<div class="prow"><span>Progress</span><em>${dev ? Math.round(dn / dev.rows.length * 100) : 0}%</em><div class="pbar"><i style="--p:${dev ? dn / dev.rows.length * 100 : 0}%;--c:var(--blue)"></i></div></div>
-     <div class="scroll"><ol class="tl">${dev ? dev.rows.map(r => `<li class="${r[2] ? "done" : r[1] < today ? "late" : ""}" style="--c:var(--blue)"><b>${esc(r[0])}</b><small>${r[2] ? "Done" : (r[1] < today ? "Was due " : "Due ") + parseDay(r[1]).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}</small></li>`).join("") : ""}</ol></div>`;
-}
-
-/* =====================================================================
-   RELATIONSHIPS — book shelves + date ideas
-   ===================================================================== */
-function renderRel() {
-  [["rFamily", "family", "family-books", "var(--orange)"], ["rGirls", "girls", "girls-books", "var(--pink)"], ["rFriends", "friends", "friends-books", "var(--blue)"]].forEach(([id, page, books, c]) => {
-    const rows = tableRows(pg(books).md).slice(1);
-    $(id).innerHTML = head(`${pg(page).icon} ${esc(pg(page).title)} · reading list`, c, books) +
-      `<div class="scroll">${rows.map(r => `<div class="book"><b>${mdInline(r[0])}</b><small>${mdInline(r[1])}</small><span class="chip c" style="--c:${c}">${mdInline(r[2])}</span></div>`).join("")}</div>`;
-  });
-  const [act, food] = pg("date-ideas").md.split(/^food:/m);
-  $("rDates").innerHTML = head("Date Ideas", "var(--pink)", "date-ideas") +
-    `<div class="g2 fill" style="grid-template-columns:2fr 1fr"><div><div class="cap" style="margin-bottom:8px">Things to do</div><div class="chips">${bullets(act).map(b => `<span class="chip c" style="--c:var(--pink)">${mdInline(b)}</span>`).join("")}</div></div>
-     <div><div class="cap" style="margin-bottom:8px">Food</div><div class="chips">${bullets(food).map(b => `<span class="chip c" style="--c:var(--orange)">🍽️ ${mdInline(b)}</span>`).join("")}</div></div></div>`;
-}
-
-/* =====================================================================
-   MIND — dopamine detox, mental health guide, books
-   ===================================================================== */
-function renderMind() {
-  // Dopamine Detox — each stage as its own card
-  const blocks = []; let cur = null;
-  L(pg("dopamine-detox").md).forEach(l => { if (/^[A-Z][^-].*:\s*$/.test(l.trim())) { cur = { h: l.trim().replace(/:$/, ""), items: [] }; blocks.push(cur); } else if (cur && /^- /.test(l)) cur.items.push(l.slice(2)); });
-  const dc = ["var(--yellow)", "var(--teal)", "var(--orange)", "var(--red)", "var(--green)"];
-  $("dDetox").innerHTML = head("🔋 Dopamine Detox", "var(--yellow)", "dopamine-detox", `<span class="hint">re-read every 3 days</span>`) +
-    `<div class="scroll">${blocks.map((b, i) => `<div class="mini" style="border-left:3px solid ${dc[i % 5]}"><h5>${String(i + 1).padStart(2, "0")} · ${esc(b.h)}</h5><ul>${b.items.map(t => `<li>${mdInline(t)}</li>`).join("")}</ul></div>`).join("")}</div>`;
-
-  // Mental Health Guide — chapters that open the guide at that chapter
-  const mh = pg("mental-health-guide").md, q = (L(mh).find(l => /^>/.test(l)) || "").replace(/^>\s?/, "");
-  const ch = L(mh).filter(l => /^## \d\d — /.test(l)).map(l => { const m = l.match(/^## (\d\d) — (.*)/); return [m[1], m[2]]; });
-  const acts = L(mh).filter(l => /^### ✦ Action Step/.test(l)).length;
-  $("dMH").innerHTML = head("🧠 Mental Health Guide", "var(--purple)", "mental-health-guide", `<span class="hint">${ch.length} chapters · ${acts} action steps</span>`) +
-    `<div class="quote">${mdInline(q)}</div>
-     <div class="scroll"><div class="g2">${ch.map(([n, t]) => `<div class="tile" data-open="mental-health-guide" data-anchor="${n} —"><span class="ti" style="font-size:13px;font-weight:800;color:var(--purple)">${n}</span><span>${mdInline(t)}</span></div>`).join("")}</div>
-       <div class="mini"><h5>✦ Do the work</h5><p>${mdInline(under(mh, /^04 — /).match(/Right now, pick one person[^\n]*/)?.[0] || "")}</p></div></div>`;
-
-  // Books — reading plan for the current book
-  const sm = pg("the-way-of-the-superior-man"), plan = tableRows(sm.md), rows = plan.slice(1);
-  const doneN = rows.filter(r => /☑|✓|x/i.test(r[4])).length, now = new Date();
-  const isToday = s => { const m = s.match(/(\d+)(st|nd|rd|th)\s+(\w{3})/); return m && +m[1] === now.getDate() && m[3] === now.toLocaleDateString("en-GB", { month: "short" }); };
-  $("dBooks").innerHTML = head("📚 Books", "var(--green)", "books") +
-    `<div class="g2">${pg("books").children[0].slugs.map(tileHTML).join("")}</div>
-     <div class="prow"><b style="font-size:13.5px">${esc(sm.title)} · reading plan</b><em>${doneN}/${rows.length} sessions</em><div class="pbar"><i style="--p:${doneN / Math.max(rows.length, 1) * 100}%"></i></div></div>
-     <div class="scroll"><ul class="rows">${rows.map(r => `<li class="${isToday(r[1]) ? "now" : ""}"><span class="ck${/☑|✓/.test(r[4]) ? " on" : ""}"></span><em>${esc(r[1])}</em><span>${esc(r[3])}<br><span class="hint">pages ${esc(r[2])}</span></span></li>`).join("")}</ul>
-       <p class="hint">${mdInline((sm.md.match(/Each session is roughly[^\n]*/) || [""])[0])}</p></div>`;
+function renderFinancial() {
+  const ward = tasksByHeading(pg("wardrobe").md).flatMap(g => g.tasks), dev = pg("full-stack-dev-roadmap").db;
+  const CARDS = [
+    ["wardrobe", "var(--teal)", `${ward.filter(t => t.done).length}/${ward.length} owned`],
+    ["purchases-wishlist", "var(--pink)", ((pg("purchases-wishlist").md.match(/Whole Total=(£[\d,.]+)/) || [])[1] || "") + " total"],
+    ["reselling-method", "var(--yellow)"],
+    ["crypto-method", "var(--orange)"],
+    ["content", "var(--red)"],
+    ["flux", "var(--purple)"],
+    ["full-stack-dev-roadmap", "var(--blue)", dev ? `${dev.rows.filter(r => r[2]).length}/${dev.rows.length} done` : ""],
+  ];
+  $("v-financial").innerHTML = CARDS.map(([slug, c, stat]) => `<button class="w glass fcard" data-open="${slug}" style="--c:${c}"><span class="fi">${pg(slug).icon}</span>
+      <span class="ft"><b>${esc(pg(slug).title)}</b><small>${esc(stat || preview(pg(slug)))}</small></span><span class="fgo">Open →</span></button>`).join("") +
+    `<a class="w glass fcard" href="${TRACKERS.find(t => t[0] === "Monthly Outgoings")[1]}" style="--c:var(--green)"><span class="fi">💷</span>
+      <span class="ft"><b>Monthly Outgoings</b><small>Opens the outgoings tracker</small></span><span class="fgo">Tracker ↗</span></a>`;
 }
 
 /* =====================================================================
@@ -1156,7 +1081,7 @@ setInterval(() => { const p = store.get("place", null); if (p) fetchWeather(p.la
 /* =====================================================================
    SECTIONS — segmented pill with a sliding thumb, cross-fading views
    ===================================================================== */
-const SECTIONS = [["today", "Today"], ["goals", "Goals"], ["physical", "Physical"], ["money", "Money"], ["content", "Content"], ["rel", "Relationships"], ["mind", "Mind"]];
+const SECTIONS = [["today", "Daily/Weekly"], ["goals", "Goals"], ["physical", "Physical"], ["financial", "Financial"]];   // Locked IN's own groups (Relationships & Mentality left out)
 const VIEWS = SECTIONS.map(s => s[0]);
 $("seg").insertAdjacentHTML("beforeend", SECTIONS.map(([v, t]) => `<button data-v="${v}">${t}</button>`).join(""));
 let view = VIEWS.includes(store.get("view2")) ? store.get("view2") : "today";
@@ -1193,12 +1118,12 @@ document.addEventListener("keydown", e => {
   if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") { e.preventDefault(); $("spotLayer").hidden ? openSpot() : closeLayer($("spotLayer")); return; }
   if (e.key === "Escape") { closeLayer($("spotLayer")); closeLayer($("sheetLayer")); return; }
   if (e.target.closest("input, textarea") || e.metaKey || e.ctrlKey || e.altKey || !$("sheetLayer").hidden) return;
-  const i = ["1", "2", "3", "4", "5", "6", "7"].indexOf(e.key); if (i >= 0) show(VIEWS[i]);
+  const i = SECTIONS.findIndex((_, n) => String(n + 1) === e.key); if (i >= 0) show(SECTIONS[i][0]);
 });
 addEventListener("resize", () => moveThumb(true));
 if (M) {   // press feedback
   let held = null;
-  document.addEventListener("pointerdown", e => { held = e.target.closest(".btn, .tile, .wknav button, .seg button, .daystrip button, .pill, .open"); if (held) M.animate(held, { scale: .95 }, spring); });
+  document.addEventListener("pointerdown", e => { held = e.target.closest(".btn, .tile, .wknav button, .seg button, .minis button, .daystrip button, .pill, .open"); if (held) M.animate(held, { scale: .95 }, spring); });
   const release = () => { if (held) { M.animate(held, { scale: 1 }, spring); held = null; } };
   document.addEventListener("pointerup", release); document.addEventListener("pointercancel", release);
 }
@@ -1208,7 +1133,7 @@ function renderAll() {
   renderGoals(); renderTracker(); renderPlan();
   renderRoutine("tMorning", "morning-routine", "☀️ Morning Routine", "var(--yellow)", false);
   renderRoutine("tNight", "night-routine", "🌙 Night Routine", "var(--indigo)", true);
-  renderGoalsView(); renderWork(); renderPhysical(); renderMoney(); renderContent(); renderRel(); renderMind();
+  renderGoalsView(); renderWork(); renderFinancial();
 }
 renderAll(); renderDock();
 show(view, true);
