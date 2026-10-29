@@ -329,6 +329,30 @@
   .shead .acts { display: flex; gap: 8px; }
   .pill { all: unset; cursor: pointer; padding: 7px 13px; border-radius: 99px; background: rgba(255,255,255,.1); color: var(--text); text-decoration: none; font-size: 12.5px; font-weight: 600; transition: background .2s; }
   .pill:hover { background: rgba(255,255,255,.2); }
+  .pill.hi { background: rgba(10,132,255,.85); color: #fff; }
+  .pill.hi:hover { background: rgba(10,132,255,1); }
+  .edited { align-self: center; font-size: 11.5px; font-weight: 700; color: var(--yellow); padding: 0 4px; }
+  .edbar { flex: none; display: flex; align-items: center; gap: 8px; padding: 12px 24px; border-top: 1px solid var(--hair); }
+  .edbar[hidden] { display: none; }
+  .edbar span { flex: 1; font-size: 12px; color: var(--faint); }
+  .doc.editing { display: flex; flex-direction: column; }
+  .ed-md { flex: 1; width: 100%; min-height: 300px; box-sizing: border-box; resize: none; border: 0; outline: none; background: transparent; color: #fff; font: 13.5px/1.65 ui-monospace, "SF Mono", Menlo, monospace; }
+  .ed-plan { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+  .ed-plan label { display: flex; flex-direction: column; gap: 6px; font-size: 13px; }
+  .ed-plan textarea { min-height: 170px; resize: vertical; padding: 10px; border-radius: 12px; border: 1px solid var(--hair); background: rgba(255,255,255,.06); color: #fff; font-family: inherit; font-size: 13px; line-height: 1.5; outline: none; }
+  .ed-plan textarea:focus, .ed-tbl .input:focus { border-color: rgba(10,132,255,.8); }
+  .ed-tbl td { padding: 4px 6px !important; }
+  .ed-tbl .input { width: 100%; min-width: 90px; box-sizing: border-box; padding: 7px 9px; font-size: 13px; }
+  .ed-tbl input[type=checkbox] { width: 17px; height: 17px; accent-color: var(--green); }
+  .ed-tbl .del { padding: 4px 9px; }
+  #edAdd { margin-top: 10px; }
+  [data-tk] .tk, .tk[data-tk], .tk[data-cell], li.tick { cursor: pointer; }
+  li.tick:hover .ck { border-color: var(--green); }
+  .end-ed { position: relative; gap: 4px; padding: 6px 8px !important; }
+  .end-ed .input { text-align: center; padding: 4px 6px; font-size: 18px; font-weight: 750; background: rgba(255,255,255,.08); }
+  .end-ed .input.sm { font-size: 11px; font-weight: 500; }
+  .end-ed .x { all: unset; cursor: pointer; position: absolute; top: 3px; right: 5px; font-size: 12px; color: var(--faint); }
+  .end-add { all: unset; cursor: pointer; text-align: center; font-size: 12.5px; font-weight: 600; color: var(--faint); border: 1px dashed var(--hair); border-radius: 14px; }
   .doc { flex: 1; min-height: 0; overflow-y: auto; padding: 18px 24px 32px; font-size: 14.5px; line-height: 1.6; color: rgba(255,255,255,.86); scrollbar-width: thin; scrollbar-color: rgba(255,255,255,.2) transparent; }
   .doc > :first-child { margin-top: 0; }
   .doc h1 { margin: 26px 0 8px; font-size: 22px; font-weight: 750; letter-spacing: -.02em; color: #fff; }
@@ -452,7 +476,8 @@
 <!-- full Notion page -->
 <div class="layer" id="sheetLayer" hidden>
   <div class="scrim" data-close></div>
-  <div class="sheet glass" id="sheet"><div class="shead" id="shHead"></div><div class="doc" id="shDoc"></div></div>
+  <div class="sheet glass" id="sheet"><div class="shead" id="shHead"></div><div class="doc" id="shDoc"></div>
+    <div class="edbar" id="shBar" hidden><span>🔒 Saved on this dashboard only — your Notion page is never changed · ⌘S to save</span><button class="pill" id="edCancel">Cancel</button><button class="pill hi" id="edSave">Save</button></div></div>
 </div>
 <!-- spotlight search -->
 <div class="layer" id="spotLayer" hidden>
@@ -510,6 +535,12 @@ tick(); setInterval(tick, 60000);
    ===================================================================== */
 const ND = window.NOTION || { groups: [], pages: {}, snapshot: "" };
 const NP = ND.pages;
+// local edits: layered over the snapshot in this browser only — nothing here ever writes back to Notion
+const clone = o => o == null ? o : JSON.parse(JSON.stringify(o));
+const ORIG = Object.fromEntries(Object.entries(NP).map(([s, p]) => [s, { md: p.md, db: clone(p.db) }]));
+let edits = store.get("edits", {});
+const applyEdit = s => { if (!NP[s]) return; const e = edits[s] || {}; NP[s].md = e.md ?? ORIG[s].md; NP[s].db = clone(e.db ?? ORIG[s].db); };
+Object.keys(edits).forEach(applyEdit);
 const pg = s => NP[s] || { slug: s, title: s, icon: "📄", md: "", children: [], kind: "page" };
 const L = t => (t || "").split("\n");
 
@@ -581,23 +612,25 @@ function under(t, re, anyLevel) {
 }
 const tasks = t => L(t).map(l => l.match(/^\s*- \[( |x)\]\s*(.*)/i)).filter(Boolean).map(m => ({ done: m[1] !== " ", t: m[2] }));
 const bullets = t => L(t).map(l => l.match(/^\s*(?:-|\d+\.)\s+(?!\[[ x]\])(.*)/i)).filter(Boolean).map(m => m[1]);
+const TASK_RE = /^(\s*(?:[-*]|\d+\.)\s+\[)( |x)(\])/i;          // a "- [ ]" line; tasks are numbered in page order
 function tasksByHeading(t) {
-  const out = []; let cur = null;
+  const out = []; let cur = null, n = 0;
   L(t).forEach(l => {
     const h = l.match(/^#{1,4}\s+(.*)/);
     if (h) { cur = { h: strip(h[1]).replace(/:\s*$/, "").trim(), tasks: [], lines: [] }; out.push(cur); return; }
+    const i = TASK_RE.test(l) ? n++ : -1;
     if (!cur) return;
     cur.lines.push(l);
-    const m = l.match(/^\s*- \[( |x)\]\s*(.*)/i); if (m) cur.tasks.push({ done: m[1] !== " ", t: m[2] });
+    const m = l.match(/^\s*(?:[-*]|\d+\.)\s+\[( |x)\]\s*(.*)/i); if (m) cur.tasks.push({ done: m[1] !== " ", t: m[2], i });
   });
   return out.filter(x => x.tasks.length);
 }
 
 // databases
-function dbHTML(d) {
+function dbHTML(d, slug) {
   if (d.kind === "plan") return `<div class="plan">${d.days.map(x => `<div class="pday${x.day === todayName() ? " today" : ""}"><h4>${esc(x.day)}${x.day === todayName() ? " · today" : ""}</h4><ol>${x.items.map(t => `<li>${mdInline(t)}</li>`).join("")}</ol></div>`).join("")}</div>`;
-  const cell = v => v === true ? `<span class="tk on"></span>` : v === false ? `<span class="tk"></span>` : /^\d{4}-\d\d-\d\d$/.test(v) ? short(parseDay(v)) : mdInline(String(v));
-  return `<div class="tbl"><table><thead><tr>${d.columns.map(c => `<th>${esc(c)}</th>`).join("")}</tr></thead><tbody>${d.rows.map(r => `<tr>${r.map(v => `<td>${cell(v)}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
+  const cell = (v, r, c) => typeof v === "boolean" ? `<span class="tk${v ? " on" : ""}"${slug ? ` data-cell="${slug}:${r}:${c}"` : ""}></span>` : /^\d{4}-\d\d-\d\d$/.test(v) ? short(parseDay(v)) : mdInline(String(v));
+  return `<div class="tbl"><table><thead><tr>${d.columns.map(c => `<th>${esc(c)}</th>`).join("")}</tr></thead><tbody>${d.rows.map((r, ri) => `<tr>${r.map((v, c) => `<td>${cell(v, ri, c)}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
 }
 const plain = s => (s || "").replace(/<[^>]+>/g, " ").replace(/[#*>|`\\-]|\[( |x)\]/g, " ").replace(/\s+/g, " ").trim();
 function preview(p) {
@@ -609,28 +642,131 @@ const tileHTML = s => `<div class="tile" data-open="${s}"><span class="ti">${pg(
 
 /* ---------- sheet: any page in full ---------- */
 const lineage = s => { const out = []; while (s && NP[s]) { out.unshift(s); s = NP[s].parent; } return out; };
-function openSheet(slug, anchor) {
+let editing = null;
+function openSheet(slug, anchor, quiet) {
   const p = NP[slug]; if (!p) return;
+  editing = null; $("shBar").hidden = true; $("shDoc").classList.remove("editing");
   const crumbs = ["Locked IN", p.group, ...lineage(slug).slice(0, -1).map(s => NP[s].title)].filter(Boolean);
   $("shHead").innerHTML = `<div><div class="crumb">${crumbs.map(esc).join("  ›  ")}</div><h2><span>${p.icon}</span>${esc(p.title)}</h2></div>
-    <div class="acts"><a class="pill" href="${esc(p.url)}" target="_blank" rel="noopener">Open in Notion ↗</a><button class="pill" data-close>Close</button></div>`;
-  const body = p.kind === "db" ? dbHTML(p.db) : md(p.md);
+    <div class="acts">${edits[slug] ? `<span class="edited">Edited here</span><button class="pill" data-reset="${slug}">Reset to Notion</button>` : ""}<button class="pill hi" data-edit="${slug}">✎ Edit</button><a class="pill" href="${esc(p.url)}" target="_blank" rel="noopener">Open in Notion ↗</a><button class="pill" data-close>Close</button></div>`;
+  const body = p.kind === "db" ? dbHTML(p.db, slug) : md(p.md);
   const kids = p.children.map(c => `${c.label ? `<h4 class="klabel">${esc(c.label)}</h4>` : ""}<div class="kgrid">${c.slugs.map(tileHTML).join("")}</div>`).join("");
-  $("shDoc").innerHTML = (body || "") + kids + (!body && !kids ? `<div class="empty">This page is empty in Notion.</div>` : "");
+  const top = $("shDoc").scrollTop;
+  $("shDoc").innerHTML = (body || "") + kids + (!body && !kids ? `<div class="empty">This page is empty — press ✎ Edit to write something.</div>` : "");
+  if (p.kind !== "db") $("shDoc").querySelectorAll("li.task > .tk").forEach((el, n) => el.dataset.tk = `${slug}:${n}`);
   const layer = $("sheetLayer"), wasOpen = !layer.hidden;
-  layer.hidden = false; $("shDoc").scrollTop = 0;
+  layer.hidden = false; $("shDoc").scrollTop = quiet ? top : 0;
   if (anchor) { const h = [...$("shDoc").querySelectorAll("h1,h2,h3")].find(x => x.textContent.includes(anchor)); if (h) $("shDoc").scrollTop = h.offsetTop - 12; }
-  if (M) {
+  if (M && !quiet) {
     if (!wasOpen) { M.animate(layer.querySelector(".scrim"), { opacity: [0, 1] }, { duration: .25 }); M.animate($("sheet"), { opacity: [0, 1], scale: [.96, 1], y: [14, 0] }, spring); }
     else M.animate([$("shHead"), $("shDoc")], { opacity: [0, 1], x: [10, 0] }, { duration: .3, ease });
   }
 }
+function openEditor(slug) {
+  const p = NP[slug], d = p.db; editing = slug;
+  $("shHead").querySelector(".acts").innerHTML = `<span class="edited">Editing</span>`;
+  const doc = $("shDoc"); doc.classList.add("editing"); doc.scrollTop = 0;
+  if (p.kind !== "db") {
+    doc.innerHTML = `<textarea class="ed-md" id="edMd" spellcheck="true" placeholder="Write in markdown — # heading, - bullet, - [ ] task, | table |"></textarea>`;
+    $("edMd").value = p.md || "";
+  } else if (d.kind === "plan") {
+    doc.innerHTML = `<div class="ed-plan">${d.days.map((x, i) => `<label><b>${esc(x.day)}</b><textarea data-day="${i}" placeholder="One item per line"></textarea></label>`).join("")}</div>`;
+    doc.querySelectorAll("[data-day]").forEach(t => t.value = d.days[+t.dataset.day].items.join("\n"));
+  } else {
+    const type = d.columns.map((c, i) => d.rows.some(r => typeof r[i] === "boolean") ? "bool" : /date/i.test(c) || (d.rows.some(r => r[i]) && d.rows.every(r => !r[i] || /^\d{4}-\d\d-\d\d$/.test(r[i]))) ? "date" : "text");
+    doc.innerHTML = `<div class="tbl"><table class="ed-tbl"><thead><tr>${d.columns.map(c => `<th>${esc(c)}</th>`).join("")}<th></th></tr></thead><tbody id="edRows"></tbody></table></div><button class="pill" id="edAdd">+ Add row</button>`;
+    const addRow = r => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = type.map(t => `<td>${t === "bool" ? `<input type="checkbox">` : `<input class="input" type="${t}">`}</td>`).join("") + `<td><button class="pill del" title="Delete row">×</button></td>`;
+      tr.querySelectorAll("input").forEach((inp, i) => { if (type[i] === "bool") inp.checked = !!(r && r[i]); else inp.value = r && r[i] != null ? r[i] : ""; });
+      tr.querySelector(".del").onclick = () => tr.remove();
+      $("edRows").appendChild(tr); return tr;
+    };
+    d.rows.forEach(addRow);
+    $("edAdd").onclick = () => addRow(null).querySelector("input").focus();
+    doc.dataset.types = type.join(",");
+  }
+  $("shBar").hidden = false;
+  const f = doc.querySelector("textarea, input"); if (f) f.focus();
+  if (M) M.animate(doc, { opacity: [0, 1] }, { duration: .25 });
+}
+function saveEditor() {
+  const slug = editing; if (!slug) return;
+  const p = NP[slug], d = p.db, doc = $("shDoc");
+  if (p.kind !== "db") commitEdit(slug, { md: $("edMd").value });
+  else if (d.kind === "plan") commitEdit(slug, { db: { ...clone(d), days: d.days.map((x, i) => ({ ...x, items: doc.querySelector(`[data-day="${i}"]`).value.split("\n").map(t => t.trim()).filter(Boolean) })) } });
+  else {
+    const type = doc.dataset.types.split(",");
+    const rows = [...$("edRows").children].map(tr => [...tr.querySelectorAll("input")].map((inp, i) => type[i] === "bool" ? inp.checked : inp.value.trim()))
+      .filter(r => r.some((v, i) => type[i] !== "bool" && v));
+    commitEdit(slug, { db: { ...clone(d), rows } });
+  }
+  openSheet(slug, null, true);
+}
+function commitEdit(slug, patch) {                           // patch: { md } or { db }; null drops the edit and goes back to the Notion snapshot
+  const prev = clone(NP[slug].db);
+  if (patch) edits[slug] = patch; else delete edits[slug];
+  store.set("edits", edits); applyEdit(slug);
+  afterEdit(slug, prev);
+}
+function toggleTask(slug, n) {
+  let k = 0;
+  commitEdit(slug, { ...edits[slug], md: L(NP[slug].md).map(l => TASK_RE.test(l) && k++ === n ? l.replace(TASK_RE, (_, a, x, b) => a + (x === " " ? "x" : " ") + b) : l).join("\n") });
+}
+function toggleCell(slug, r, c) {
+  const db = clone(NP[slug].db); db.rows[r][c] = !db.rows[r][c]; commitEdit(slug, { db });
+}
+// keep the parts of the dashboard that copy Notion into their own state in step
+function diffRows(prev = [], next = []) {
+  const ren = new Map(), pn = new Set(prev.map(r => r[0])), nn = new Set(next.map(r => r[0]));
+  prev.forEach((r, i) => { const nw = next[i] && next[i][0]; if (nw && r[0] !== nw && !nn.has(r[0]) && !pn.has(nw)) ren.set(r[0], nw); });   // same row, new name
+  return { ren, gone: prev.map(r => r[0]).filter(n => !nn.has(n) && !ren.has(n)), pm: Object.fromEntries(prev.map(r => [r[0], r])) };
+}
+function afterEdit(slug, prev) {
+  const rows = NP[slug].db && NP[slug].db.rows, prows = prev && prev.rows;
+  if (slug === "daily-tasks" && rows) {
+    const { ren, gone } = diffRows(prows, rows), same = (a, b) => a.toLowerCase() === b.toLowerCase(), cap = t => t[0].toUpperCase() + t.slice(1);
+    ren.forEach((nw, old) => { const g = goals.find(g => same(g.text, old)); if (g && nw) g.text = cap(nw); });
+    goals = goals.filter(g => !gone.some(n => same(n, g.text)));
+    rows.forEach(r => { if (r[0] && !goals.some(g => same(g.text, r[0]))) goals.push({ id: uid(), text: cap(r[0]) }); });
+    const at = g => { const i = rows.findIndex(r => same(r[0], g.text)); return i < 0 ? 1e9 : i; };
+    goals.sort((a, b) => at(a) - at(b)); saveGoals();
+  }
+  const gt = GYM.find(g => g[1] === slug);
+  if (gt && rows) {
+    const list = gym.plans[gt[0]] = gym.plans[gt[0]] || [], { ren, gone, pm } = diffRows(prows, rows);
+    ren.forEach((nw, old) => { const e = list.find(e => e.name === old); if (e) { gym.lifts.forEach(l => { if (l.ex === old) l.ex = nw; }); e.name = nw; } });
+    rows.forEach(r => {
+      if (!r[0]) return;
+      const kg = gNum(r[2]), nx = gNum(String(r[3]).split("|")[0]), reps = (String(r[3]).split("|")[1] || "").trim();
+      const e = list.find(e => e.name === r[0]), was = pm[r[0]] || pm[[...ren].find(([, n]) => n === r[0])?.[0]];
+      if (!e) { list.push({ id: uid(), name: r[0], sets: r[1], kg, next: nx || kg, reps, on: r[5], start: +(kg - gNum(r[4])).toFixed(2), range: repRange(reps || r[1]), step: nx > kg ? +(nx - kg).toFixed(2) : 2.5 }); return; }
+      e.sets = r[1];
+      if (!was || was[2] !== r[2] || was[3] !== r[3]) { e.kg = kg; e.next = nx || kg; e.reps = reps; e.range = repRange(reps || r[1]); if (nx > kg) e.step = +(nx - kg).toFixed(2); }
+    });
+    const at = e => { const i = rows.findIndex(r => r[0] === e.name); return i < 0 ? 1e9 : i; };
+    gym.plans[gt[0]] = list.filter(e => !gone.includes(e.name)).sort((a, b) => at(a) - at(b)); saveGym();
+  }
+  renderAll();
+  if (!$("sheetLayer").hidden && !editing && $("shHead").querySelector(`[data-edit="${slug}"]`)) openSheet(slug, null, true);
+}
 async function closeLayer(layer) {
   if (layer.hidden) return;
+  if (layer.id === "sheetLayer") editing = null;
   if (M) await Promise.all([M.animate(layer.querySelector(".scrim"), { opacity: 0 }, { duration: .18 }).finished, M.animate(layer.children[1], { opacity: 0, scale: .97 }, { duration: .18 }).finished]);
   layer.hidden = true;
 }
 document.addEventListener("click", e => {
+  const tk = e.target.closest("[data-tk]");
+  if (tk) { const [s, n] = tk.dataset.tk.split(":"); toggleTask(s, +n); return; }
+  const dc = e.target.closest("[data-cell]");
+  if (dc) { const [s, r, c] = dc.dataset.cell.split(":"); toggleCell(s, +r, +c); return; }
+  const ed = e.target.closest("[data-edit]");
+  if (ed) { openEditor(ed.dataset.edit); return; }
+  const rs = e.target.closest("[data-reset]");
+  if (rs) { if (confirm(`Undo every change you made to “${NP[rs.dataset.reset].title}” on the dashboard and go back to the Notion version?`)) commitEdit(rs.dataset.reset, null); return; }
+  if (e.target.closest("#edSave")) { saveEditor(); return; }
+  if (e.target.closest("#edCancel")) { openSheet(editing, null, true); return; }
   const o = e.target.closest("[data-open]");
   if (o) { e.preventDefault(); closeLayer($("spotLayer")); openSheet(o.dataset.open, o.dataset.anchor); return; }
   if (e.target.closest("[data-close]")) closeLayer(e.target.closest(".layer"));
@@ -782,14 +918,28 @@ function renderRoutine(id, slug, title, color, pm) {
 /* =====================================================================
    GOALS — The End Goal stats, Nov → May grind, weekly goals
    ===================================================================== */
+// The End Goal — headline stats, editable in place (✎), kept on this dashboard
+const END_DEFAULT = [["£10K", "a month — the main goal", "var(--yellow)"], ["£10K", "saved for travelling", "var(--green)"], ["£25k+", "car", "var(--blue)"],
+  ["Level 6", "bachelor's degree in cyber — plan B", "var(--pink)"], ["75–80kg", "physique", "var(--orange)"]];
+const END_COLORS = ["var(--yellow)", "var(--green)", "var(--blue)", "var(--pink)", "var(--orange)", "var(--purple)", "var(--teal)"];
+let endStats = store.get("endStats", END_DEFAULT), endEditing = false;
+function renderEndGoal() {
+  const tile = "display:flex;flex-direction:column;justify-content:center;text-align:center";
+  $("gEnd").innerHTML = head("The End Goal", "var(--yellow)", "the-end-goal", `<button class="open" id="endEdit" title="${endEditing ? "Done" : "Edit stats"}">${endEditing ? "✓" : "✎"}</button>`) +
+    `<div class="fill" style="display:grid;grid-auto-rows:1fr;gap:8px">${endEditing
+      ? endStats.map((h, i) => `<div class="mini stat end-ed" style="${tile}" data-i="${i}"><input class="input" value="${esc(h[0])}" style="color:${h[1] ? h[2] : ""}"><input class="input sm" value="${esc(h[1])}"><button class="x" title="Remove">×</button></div>`).join("") + `<button class="mini end-add">+ Add stat</button>`
+      : endStats.map(h => `<div class="mini stat" style="${tile}"><b style="color:${h[2]};font-size:24px">${esc(h[0])}</b><small style="font-size:11px">${esc(h[1])}</small></div>`).join("")}</div>`;
+  const grab = () => $("gEnd").querySelectorAll(".end-ed").forEach(t => { const [v, l] = t.querySelectorAll("input"); endStats[+t.dataset.i] = [v.value.trim(), l.value.trim(), endStats[+t.dataset.i][2]]; });
+  $("endEdit").onclick = () => { if (endEditing) { grab(); endStats = endStats.filter(h => h[0] || h[1]); store.set("endStats", endStats); } endEditing = !endEditing; renderEndGoal(); };
+  if (!endEditing) return;
+  $("gEnd").querySelectorAll(".end-ed .x").forEach(b => b.onclick = () => { grab(); endStats.splice(+b.parentNode.dataset.i, 1); renderEndGoal(); });
+  $("gEnd").querySelector(".end-add").onclick = () => { grab(); endStats.push(["", "", END_COLORS[endStats.length % END_COLORS.length]]); renderEndGoal(); const ins = $("gEnd").querySelectorAll(".end-ed input"); ins[ins.length - 2].focus(); };
+  $("gEnd").querySelectorAll(".end-ed input").forEach(inp => inp.onkeydown = e => { if (e.key === "Enter") $("endEdit").click(); });
+}
 function renderGoalsView() {
   const end = pg("the-end-goal").md, grind = pg("october-to-may-grind").md;
   // The End Goal — headline stats only
-  const stats = [["£10K", "a month — the main goal", "var(--yellow)", /10K A MONTH/i], ["£10K", "saved for travelling", "var(--green)", /./], ["£25k+", "car", "var(--blue)", /25k\+ car/i],
-    ["Level 6", "bachelor's degree in cyber — plan B", "var(--pink)", /level 6/i], ["75–80kg", "physique", "var(--orange)", /75-80kg/i]]
-    .filter(h => h[3].test(end));
-  $("gEnd").innerHTML = head("The End Goal", "var(--yellow)", "the-end-goal") +
-    `<div class="fill" style="display:grid;grid-auto-rows:1fr;gap:8px">${stats.map(h => `<div class="mini stat" style="display:flex;flex-direction:column;justify-content:center;text-align:center"><b style="color:${h[2]};font-size:24px">${h[0]}</b><small style="font-size:11px">${h[1]}</small></div>`).join("")}</div>`;
+  renderEndGoal();
 
   // November → May grind — goals on the left, one month at a time on the right (Notion's "October" section is the first month)
   const MONTHS = ["November", "December", "January", "February", "March", "April", "May"];
@@ -797,7 +947,7 @@ function renderGoalsView() {
   const all = tasksByHeading(grind), isMonth = h => h === "October" || MONTHS.includes(h);
   const byMonth = Object.fromEntries(all.filter(g => isMonth(g.h)).map(g => [g.h === "October" ? "November" : g.h, g.tasks]));
   const goalGroups = all.filter(g => !isMonth(g.h));
-  const ticks = ts => `<ul class="rows" style="margin-top:4px">${ts.map(t => `<li><span class="ck${t.done ? " on" : ""}"></span><span>${mdInline(t.t)}</span></li>`).join("")}</ul>`;
+  const ticks = ts => `<ul class="rows" style="margin-top:4px">${ts.map(t => `<li class="tick" data-tk="october-to-may-grind:${t.i}"><span class="ck${t.done ? " on" : ""}"></span><span>${mdInline(t.t)}</span></li>`).join("")}</ul>`;
   $("gGrind").innerHTML = head("November → May Grind", "var(--green)", "october-to-may-grind") +
     `<div class="grind fill">
        <div class="scroll"><div class="cap">Goals</div>${goalGroups.map(g => {
@@ -820,9 +970,9 @@ function renderGoalsView() {
   showMonth();
 
   // weekly goals
-  const wg = pg("weekly-goals").db ? [...pg("weekly-goals").db.rows].sort((a, b) => a[1] < b[1] ? -1 : 1) : [];
+  const wg = pg("weekly-goals").db ? pg("weekly-goals").db.rows.map((r, i) => [...r, i]).sort((a, b) => a[1] < b[1] ? -1 : 1) : [];
   $("gWeekly").innerHTML = head("Weekly Goals", "var(--blue)", "weekly-goals", `<span class="hint">${wg.filter(r => r[2]).length}/${wg.length} done</span>`) +
-    `<div class="scroll"><ul class="rows">${wg.map(r => `<li><span class="ck${r[2] ? " on" : ""}"></span><span>${mdInline(r[0])}</span><span class="r">${short(parseDay(r[1]))}</span></li>`).join("")}</ul></div>`;
+    `<div class="scroll"><ul class="rows">${wg.map(r => `<li class="tick" data-cell="weekly-goals:${r[3]}:2"><span class="ck${r[2] ? " on" : ""}"></span><span>${mdInline(r[0])}</span><span class="r">${short(parseDay(r[1]))}</span></li>`).join("")}</ul></div>`;
 }
 
 /* =====================================================================
@@ -854,6 +1004,7 @@ const typeColor = t => (GYM.find(g => g[0] === t) || [, , "var(--gray)"])[2];
   if (changed) saveGym();
 })();
 const kgf = n => String(+(+n).toFixed(2));
+const gNum = s => parseFloat(String(s).replace(/[^\d.]/g, "")) || 0;
 function repRange(t) {                                       // "6-8 Reps" → [6, 8], "3 sets of 12" → [10, 12], else [6, 8]
   const m = String(t || "").match(/(\d+)\s*[-–]\s*(\d+)\s*reps?/i) || String(t || "").match(/(\d+)\s*reps?/i);
   if (m) return [+m[1], +(m[2] || m[1])];
@@ -1115,6 +1266,7 @@ function show(next, first) {
 }
 document.querySelectorAll("#seg button").forEach(b => b.onclick = () => show(b.dataset.v));
 document.addEventListener("keydown", e => {
+  if (editing && (e.metaKey || e.ctrlKey) && (e.key.toLowerCase() === "s" || e.key === "Enter")) { e.preventDefault(); saveEditor(); return; }
   if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") { e.preventDefault(); $("spotLayer").hidden ? openSpot() : closeLayer($("spotLayer")); return; }
   if (e.key === "Escape") { closeLayer($("spotLayer")); closeLayer($("sheetLayer")); return; }
   if (e.target.closest("input, textarea") || e.metaKey || e.ctrlKey || e.altKey || !$("sheetLayer").hidden) return;
